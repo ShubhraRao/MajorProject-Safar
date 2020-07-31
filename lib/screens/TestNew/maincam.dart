@@ -57,7 +57,8 @@ class _CameraModeState extends State<CameraMode> {
   String loc_data = "";
   String current_address = "";
   String loc_lat, loc_lon, loc_pin;
-  TextEditingController urlcontroller = TextEditingController();
+  bool isLoading = false;
+  // TextEditingController urlcontroller = TextEditingController();
   final String uid;
   List<DocumentSnapshot> list = List();
   QuerySnapshot querySnapshot;
@@ -79,6 +80,27 @@ class _CameraModeState extends State<CameraMode> {
       _image = image;
     });
   }
+
+  List<DocumentSnapshot> urllist = List(); 
+  getList()
+  async {
+    QuerySnapshot querySnapshottravel =
+        await Firestore.instance.collection("location_travel").getDocuments();
+    list = querySnapshottravel.documents;
+    QuerySnapshot qs = await Firestore.instance.collection('imageUrl').getDocuments();
+    urllist = qs.documents;
+    setState(() {
+      finalurl = urllist[0].data["url"];
+      isLoading = true;
+    });
+    print(finalurl);
+  }
+
+  void initState(){
+    getList();
+    super.initState();
+  }
+
 
 //verify(){
   Future verify() async {
@@ -151,7 +173,7 @@ class _CameraModeState extends State<CameraMode> {
     setState(() {
       confirm = 1;
     });
-    getList();
+    // getList();
     final position = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     print(position);
@@ -191,15 +213,13 @@ class _CameraModeState extends State<CameraMode> {
             print(list[i].data["userid"]);
             print(uid);
 
-            var p = (list[i].data["priority"] == null)
-              ? list[i].data["NumberOfReportings"]
-              : list[i].data["priority"];
+            var p = list[i].data["NumberOfReportings"];
             print("Priority is: " + p.toString());
             databaseReference
                 .collection("location_travel")
                 .document(list[i].documentID)
                 .updateData({
-              "priority": p + 1,
+              "NumberOfReportings": p + 1,
               "timeStamp": DateTime.now(),
             }).then((_) {
               print("update success!");
@@ -219,25 +239,21 @@ class _CameraModeState extends State<CameraMode> {
           }
         }
       } else {
-        uploadData(uid, loc_lat2, loc_lon2, time, loc_pin, current_address, url,
-            place, 1, survey);
+        uploadData(uid, loc_lat2, loc_lon2, time, loc_pin, current_address,	
+            place, 1, surveypriority, survey);
       }
       if (check == 1) {
         var priority = 1;
 
-        uploadData(uid, loc_lat2, loc_lon2, time, loc_pin, current_address, url,
-            place, priority, survey);
+        uploadData(uid, loc_lat2, loc_lon2, time, loc_pin, current_address,	
+            place, priority, surveypriority, survey);
       }
       _image = null;
       pothole = 0;
     });
   }
 
-  getList() async {
-    QuerySnapshot querySnapshottravel =
-        await Firestore.instance.collection("location_travel").getDocuments();
-    list = querySnapshottravel.documents;
-  }
+
 
   final databaseReference = Firestore.instance;
   var docId;
@@ -248,9 +264,10 @@ class _CameraModeState extends State<CameraMode> {
       DateTime timeStamp,
       String pincode,
       String address,
-      String url,
+      
       Placemark place,
       var priority,
+      String surveypriority,
       String survey) async {
     //getList();
     var dateref = DateFormat("ddMMyyyy_hhmmss")
@@ -280,7 +297,8 @@ class _CameraModeState extends State<CameraMode> {
       'locality': place.locality,
       'administrativeArea': place.administrativeArea,
       'NumberOfReportings': priority,
-      'SurveyPriority': survey
+      'SurveyPriority': surveypriority,
+      'SurveyDescrption': survey
     }).then((_) {
       // print("success!");
       setState(() {
@@ -318,13 +336,6 @@ class _CameraModeState extends State<CameraMode> {
       title: new Center(
           child: new Text("CAPTURE IMAGE", textAlign: TextAlign.center)),
       elevation: 0,
-      actions: <Widget>[
-        GestureDetector(
-            onTap: () {
-              seturl();
-            },
-            child: Icon(Icons.add, color: Color(0xFF89216B)))
-      ],
     );
   }
 
@@ -397,51 +408,14 @@ class _CameraModeState extends State<CameraMode> {
     );
   }
 
-  seturl() async {
-    showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            contentPadding: const EdgeInsets.all(16.0),
-            content: new Row(
-              children: <Widget>[
-                new Expanded(
-                  child: new TextField(
-                    controller: urlcontroller,
-                    autofocus: true,
-                    decoration: new InputDecoration(
-                        labelText: 'Set URL',
-                        hintText: 'http://b0a52610a834.ngrok.io/detections'),
-                  ),
-                )
-              ],
-            ),
-            actions: <Widget>[
-              new FlatButton(
-                  child: const Text('CONFIRM'),
-                  onPressed: () {
-                    setState(() {
-                      finalurl = urlcontroller.text.trim();
-                    });
-                    Navigator.pop(context);
-                  }),
-              new FlatButton(
-                  child: const Text('DISMISS'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-            ],
-          );
-        });
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) => HomePage(uid, "2"))); 
+            MaterialPageRoute(builder: (context) => HomePage(uid, "2")));
       },
       child: Scaffold(
           appBar: _buildAppBar(),
@@ -454,7 +428,7 @@ class _CameraModeState extends State<CameraMode> {
             backgroundColor: Color(0xFF89216B),
             child: Icon(Icons.camera_alt),
           ),
-          body: new Stack(children: <Widget>[
+          body: (!isLoading) ? Center(child: CircularProgressIndicator()) : new Stack(children: <Widget>[
             new Container(
               decoration: new BoxDecoration(
                 image: new DecorationImage(
@@ -514,9 +488,11 @@ class _CameraModeState extends State<CameraMode> {
       if (val == 1) {
         roadgroup = 1;
         p1 = true;
+        survey="Main road";
       } else {
         roadgroup = 2;
         p1 = false;
+        survey="Residential road";
       }
     });
   }
@@ -526,9 +502,11 @@ class _CameraModeState extends State<CameraMode> {
       if (val == 1) {
         placegroup = 1;
         p2 = true;
+        survey = survey +","+ "Centre of the road";
       } else {
         placegroup = 2;
         p2 = false;
+        survey = survey +","+ "Edge of the road";
       }
     });
   }
@@ -538,14 +516,16 @@ class _CameraModeState extends State<CameraMode> {
       if (val == 1) {
         sizegroup = 1;
         p3 = true;
+        survey = survey + ","+"Big pothole";
       } else {
         sizegroup = 2;
         p3 = false;
+        survey = survey +","+ "Small pothole";
       }
     });
   }
 
-  String surveypriority;
+  String surveypriority, survey;
   bool p1, p2, p3;
   int roadgroup, sizegroup, placegroup;
   uploadthewholething() {

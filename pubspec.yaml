@@ -45,6 +45,7 @@ dependencies:
   charts_flutter: ^0.9.0
   just_audio: ^0.2.2
   flutter_vibrate: ^1.0.0
+  flutter_screenutil: ^2.3.1
 
 
 dev_dependencies:

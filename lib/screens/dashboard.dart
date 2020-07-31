@@ -156,10 +156,6 @@ class _MainDashboardState extends State<MainDashboard> {
         await Firestore.instance.collection("location_travel").getDocuments();
     listtravel = querySnapshottravel.documents;
 
-    QuerySnapshot querySnapshotimage =
-        await Firestore.instance.collection("location_image").getDocuments();
-    listimage = querySnapshotimage.documents;
-    listtravel.addAll(listimage);
     newlist = listtravel.reversed.toList();
     QuerySnapshot querySnapshotfixed =
         await Firestore.instance.collection("fixed_potholes").getDocuments();
@@ -183,7 +179,7 @@ class _MainDashboardState extends State<MainDashboard> {
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
       // bottomNavigationBar: _buildBottomBar(),
-      body: _buildBody(context),
+      body: (!isLoading) ? Center(child: CircularProgressIndicator()) : _buildBody(context),
     );
   }
 

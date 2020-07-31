@@ -9,7 +9,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final int _numPages = 3;
+  final int _numPages = 4;
   final PageController _pageController = PageController(initialPage: 0);
   int _currentPage = 0;
 
@@ -164,7 +164,42 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 30.0),
                               child: Text(
-                                "Using the sensors in your phone, our app detects potholes based on vibrations so you don't have to!",
+                                "Using the sensors in your phone, our app detects potholes while you are travelling so you don't have to!",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w300,
+                                    color: Colors.white),
+                              ),
+                            )
+                          ],
+                        ),
+                        Column(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(50.0),
+                              child: Image(
+                                image: AssetImage(
+                                  'assets/bgimages/onboarding_alert.png',
+                                ),
+                                height: 200.0,
+                                width: 200.0,
+                              ),
+                            ),
+                            // SizedBox(height: 25.0),
+                            Text(
+                              'No more unexpected potholes!', textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                            SizedBox(height: 15.0),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 30.0),
+                              child: Text(
+                                "Using our alert mode, our app alerts you if there is a pothole near you.!",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     fontSize: 16,

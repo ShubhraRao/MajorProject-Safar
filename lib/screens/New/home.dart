@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:potholedetection/screens/TestNew/alerttry.dart';
 import 'package:potholedetection/screens/dashboard.dart';
 import 'package:potholedetection/screens/maps.dart';
 import 'package:potholedetection/screens/newtravel.dart';
 import 'package:potholedetection/travelstart.dart';
 import 'package:potholedetection/screens/TestNew/travintro.dart';
 import 'package:potholedetection/screens/TestNew/camintro.dart';
-import 'package:potholedetection/screens/TestNew/alertintro.dart';
+// import 'package:potholedetection/screens/TestNew/alertintro.dart';
 
 class HomePage extends StatefulWidget {
   final String uid, ind;

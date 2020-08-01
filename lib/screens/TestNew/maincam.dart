@@ -598,12 +598,12 @@ class _CameraModeState extends State<CameraMode> {
                     else
                       surveypriority = "IMedium";
                     var time = new DateTime.now();
-                    final StorageReference firebaseStorageRef = FirebaseStorage
-                        .instance
-                        .ref()
-                        .child('PotholeImages/$time');
-                    final StorageUploadTask task =
-                        firebaseStorageRef.putFile(_image);
+                    // final StorageReference firebaseStorageRef = FirebaseStorage
+                    //     .instance
+                    //     .ref()
+                    //     .child('PotholeImages/$time');
+                    // final StorageUploadTask task =
+                    //     firebaseStorageRef.putFile(_image);
 
                     // var downloadUrl =
                     //   await (await task.onComplete).ref.getDownloadURL();

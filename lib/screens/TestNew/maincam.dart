@@ -65,6 +65,8 @@ class _CameraModeState extends State<CameraMode> {
   _CameraModeState(this.uid);
   String finalurl;
 
+  TextEditingController landmark= TextEditingController();
+
   Future getImage(bool isCamera) async {
     File image;
     if (isCamera) {
@@ -169,7 +171,7 @@ class _CameraModeState extends State<CameraMode> {
     }
   }
 
-  void _getCurrentLocation(String url, String survey) async {
+  void _getCurrentLocation(String spriority, String sdesc) async {
     setState(() {
       confirm = 1;
     });
@@ -200,30 +202,41 @@ class _CameraModeState extends State<CameraMode> {
       var docid = "Loc_" + loc_lat + "_" + loc_lon;
       var loc_lat2 = double.parse(loc_lat);
       var loc_lon2 = double.parse(loc_lon);
+      List uidarr;
       // await DBService(docid: "docid").addData(loc_lat, loc_lon, time, loc_pin, current_address, url);
       if (list.length != null) {
-        for (int i = 0; i < list.length; i++) {
-          if (list[i].data["lat"].toString().substring(0, 7) ==
+        for (int i = 0; i < list.length; i++)
+        {
+        uidarr = list[i].data["userid"].split(",");
+        String u=list[i].data["userid"];
+        if (list[i].data["lat"].toString().substring(0, 7) ==
                       loc_lat.toString().substring(0, 7) &&
                   list[i].data["lon"].toString().substring(0, 7) ==
-                      loc_lon.toString().substring(0, 7) &&
-                  list[i].data["userid"] != uid ||
-              list[i].data["address"] == current_address &&
-                  list[i].data["userid"] != uid) {
-            print(list[i].data["userid"]);
-            print(uid);
-
-            var p = list[i].data["NumberOfReportings"];
-            print("Priority is: " + p.toString());
-            databaseReference
-                .collection("location_travel")
-                .document(list[i].documentID)
-                .updateData({
-              "NumberOfReportings": p + 1,
-              "timeStamp": DateTime.now(),
-            }).then((_) {
-              print("update success!");
-            });
+                      loc_lon.toString().substring(0, 7) ||
+              //&&                  list[i].data["userid"] != uid ||
+              list[i].data["address"] == current_address )
+                  //&&                  list[i].data["userid"] != uid)
+              {
+//            print(list[i].data["userid"]);
+//            print(uid);
+            //  for()
+            var p =list[i].data["NumberOfReportings"];
+            int j;
+            for ( j = 0; j < uidarr.length; j++) {
+              if (uidarr[j] == uid)
+                break;
+            }
+            if (j == uidarr.length-1) {
+              databaseReference
+                  .collection("location_travel")
+                  .document(list[i].documentID)
+                  .updateData({
+                "uid": u + "," + uid,
+                "NumberOfReportings": p + 1,
+                "timeStamp": DateTime.now(),
+              }).then((_) {
+                print("update success!");
+              });
             break;
           } else if (list[i].data["lat"].toString().substring(0, 7) ==
                       loc_lat.toString().substring(0, 7) &&
@@ -234,19 +247,35 @@ class _CameraModeState extends State<CameraMode> {
                   list[i].data["userid"] == uid) {
             print("DO NOT UPDATE");
             break;
-          } else {
+          // break;
+            }
+          }else if (list[i].data["lat"].toString().substring(0, 7) ==
+                      loc_lat.toString().substring(0, 7) &&
+                  list[i].data["lon"].toString().substring(0, 7) ==
+                      loc_lon.toString().substring(0, 7) ||
+              list[i].data["address"].toString() == current_address ) {
+          int j;
+          for (j = 0; j < uidarr.length; j++) {
+            if (uidarr[j] == uid)
+              break;
+          }
+          if (j < uidarr.length - 1) {
+            print("DO NOT UPDATE");
+            break;
+          }
+        }else {
             check = 1;
           }
         }
       } else {
         uploadData(uid, loc_lat2, loc_lon2, time, loc_pin, current_address,	
-            place, 1, surveypriority, survey);
+            place, 1,spriority, sdesc);
       }
       if (check == 1) {
         var priority = 1;
 
         uploadData(uid, loc_lat2, loc_lon2, time, loc_pin, current_address,	
-            place, priority, surveypriority, survey);
+            place, priority, spriority, sdesc);
       }
       _image = null;
       pothole = 0;
@@ -267,8 +296,8 @@ class _CameraModeState extends State<CameraMode> {
       
       Placemark place,
       var priority,
-      String surveypriority,
-      String survey) async {
+      String spriority,
+      String sdesc) async {
     //getList();
     var dateref = DateFormat("ddMMyyyy_hhmmss")
         .format(DateTime.parse(timeStamp.toString()));
@@ -297,8 +326,8 @@ class _CameraModeState extends State<CameraMode> {
       'locality': place.locality,
       'administrativeArea': place.administrativeArea,
       'NumberOfReportings': priority,
-      'SurveyPriority': surveypriority,
-      'SurveyDescrption': survey
+      'SurveyPriority': spriority,
+      'SurveyDescrption': sdesc
     }).then((_) {
       // print("success!");
       setState(() {
@@ -578,6 +607,12 @@ class _CameraModeState extends State<CameraMode> {
                   groupValue: sizegroup,
                   title: const Text('Small pothole'),
                   onChanged: size),
+              TextField(
+                controller: landmark,
+                decoration: InputDecoration(
+                  hintText: 'Enter a landmark'
+                ),
+              ), 
               FlatButton(
                   color: Colors.transparent,
                   shape: RoundedRectangleBorder(

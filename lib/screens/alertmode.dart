@@ -79,16 +79,16 @@ class _AlertModeState extends State<AlertMode>
       newd = calculateDistance(position.latitude, position.longitude,
           listloc[i].lat, listloc[i].lon);
       print(newd);
-      if (newd < 0.07
+      if (newd < 1.08
           // )
           &&
-          newd > 0.03) {
+          newd > 1.06) {
         print(newd);
         check = 1;
         break;
       } else {
         check = 0;
-      }
+      } 
     }
     // print("Checkkkk");
     // print(check);

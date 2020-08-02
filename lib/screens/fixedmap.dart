@@ -2,14 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:potholedetection/screens/New/home.dart';
-import 'package:potholedetection/screens/fixedmap.dart';
 import 'package:potholedetection/screens/try2.dart';
+import 'package:potholedetection/screens/maps.dart';
 import 'package:potholedetection/screens/usermap.dart';
 
-class ViewMap extends StatelessWidget {
+class FixedMap extends StatelessWidget {
   final String uid;
 
-  const ViewMap({Key key, this.uid}) : super(key: key);
+  const FixedMap({Key key, this.uid}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -20,24 +20,28 @@ class ViewMap extends StatelessWidget {
       child: MaterialApp(
         title: "Safar",
         debugShowCheckedModeBanner: false,
-        home: ViewMapPage(uid: uid),
+        home: FixedMapPage(),
       ),
     );
   }
 }
 
-class ViewMapPage extends StatefulWidget {
+class FixedMapPage extends StatefulWidget {
   final String uid;
 
-  const ViewMapPage({Key key, this.uid}) : super(key: key);
-
+  const FixedMapPage({Key key, this.uid}) : super(key: key);
   @override
-  _ViewMapPageState createState() => _ViewMapPageState();
+  _FixedMapPageState createState() => _FixedMapPageState();
 }
 
-class _ViewMapPageState extends State<ViewMapPage> {
+class _FixedMapPageState extends State<FixedMapPage> {
+  BitmapDescriptor pinLocationIcon;
   static GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  List<String> dropdownSort = [
+    'Priority',
+    'Oldest to Newest',
+    'Newest to Oldest'
+  ];
   List<Marker> allMarkers = [];
   double lat, lon;
   double lat1, lon1;
@@ -50,6 +54,7 @@ class _ViewMapPageState extends State<ViewMapPage> {
   @override
   void initState() {
     super.initState();
+    setCustomMapPin();
     getLocImage().then((results) {
       setState(() {
         querySnapshot = results;
@@ -66,6 +71,12 @@ class _ViewMapPageState extends State<ViewMapPage> {
     });
   }
 
+   void setCustomMapPin() async {
+      pinLocationIcon = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(devicePixelRatio: 2.5),
+      'assets/bgimages/destination_map_marker.png');
+   }
+
   getLat() {
     int len = querySnapshot.documents.length;
     print(len);
@@ -81,9 +92,9 @@ class _ViewMapPageState extends State<ViewMapPage> {
           markerId: MarkerId(i.toString()),
           draggable: true,
           onTap: () {
-            _scaffoldKey.currentState.showSnackBar(SnackBar(
-              content: Text("Pothole!"),
-            ));
+            // _scaffoldKey.currentState.showSnackBar(SnackBar(
+            //   content: Text("Pothole!"),
+            // ));
             // Navigator.push(context, MaterialPageRoute(builder: (context) => ShowData()));
             CameraPosition(target: LatLng(lat1, lon1), zoom: 12.0);
           },
@@ -107,9 +118,9 @@ class _ViewMapPageState extends State<ViewMapPage> {
           markerId: MarkerId(i.toString()),
           draggable: true,
           onTap: () {
-            // _scaffoldKey.currentState.showSnackBar(SnackBar(
-            //   content: Text("Pothole!"),
-            // ));
+            _scaffoldKey.currentState.showSnackBar(SnackBar(
+              content: Text("Pothole!"),
+            ));
             // Navigator.push(context, MaterialPageRoute(builder: (context) => ShowData()));
             CameraPosition(target: LatLng(lat1, lon1), zoom: 12.0);
           },
@@ -134,17 +145,18 @@ class _ViewMapPageState extends State<ViewMapPage> {
   }
 
   getLocImage() async {
-    return await Firestore.instance.collection('location_image').getDocuments();
+    return await Firestore.instance.collection('fixed_potholes').getDocuments();
   }
 
   getLocTravel() async {
     return await Firestore.instance
-        .collection('location_travel')
+        .collection('fixed_potholes')
         .getDocuments();
   }
 
   @override
   Widget build(BuildContext context) {
+    LatLng pinPosition = LatLng(37.3797536, -122.1017334);
     if (querySnapshot != null) {
       print("AAadsadadd");
       getLat();
@@ -158,7 +170,7 @@ class _ViewMapPageState extends State<ViewMapPage> {
         : Scaffold(
             key: _scaffoldKey,
             // appBar: AppBar(
-            //   title: Text('Mapsss'),
+            //   title: Text('Maps'),
             // ),
             body: SafeArea(
               child: Stack(children: [
@@ -167,22 +179,21 @@ class _ViewMapPageState extends State<ViewMapPage> {
                   width: MediaQuery.of(context).size.width,
                   child: GoogleMap(
                     initialCameraPosition: CameraPosition(
-                        target: LatLng(12.9767, 77.5713), zoom: 11.0),
+                        target: LatLng(12.9767, 77.5713), zoom: 10.0),
                     markers: Set.from(allMarkers),
                     onMapCreated: mapCreated,
                   ),
                 ),
-                Row(
+                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     RaisedButton(
-                      color: Colors.blue[400],
                         onPressed: () {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      ViewMap()));
+                                      UserMap(uid: widget.uid)));
                         },
                         child: Text("ALL")),
                     RaisedButton(
@@ -190,10 +201,11 @@ class _ViewMapPageState extends State<ViewMapPage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>  UserMap(uid: widget.uid)));
+                                  builder: (context) => UserMap(uid: widget.uid)));
                         },
                         child: Text("YOU")),
                     RaisedButton(
+                      color: Colors.blue[400],
                         onPressed: () {
                           Navigator.push(
                               context,

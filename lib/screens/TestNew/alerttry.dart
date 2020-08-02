@@ -83,11 +83,13 @@ class _AlertIntroState extends State<AlertIntro> {
 
     //   }
     // }
-    if (newlist2.length > 10 &&
-        newlist2[newlist2.length - 1]
-            .data["timeStamp"]
-            .toDate()
-            .isAfter(DateTime.now().subtract(const Duration(days: 14)))) {
+    if (newlist2.length > 10 
+    // &&
+        // newlist2[newlist2.length - 1]
+        //     .data["timeStamp"]
+        //     .toDate()
+        //     .isAfter(DateTime.now().subtract(const Duration(days: 14)))
+            ) {
       return true;
     } else {
       return false;
@@ -240,7 +242,7 @@ class _AlertIntroState extends State<AlertIntro> {
                           )),
                           Align(
                             alignment: Alignment.bottomCenter,
-                            child: (!checkdata())
+                            child: (checkdata())
                                 ?
                                 // Icon(Icons.lock, color: Colors.amber, size: 40.0)
                                 Column(children: <Widget>[

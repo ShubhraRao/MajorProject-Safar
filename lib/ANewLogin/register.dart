@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:potholedetection/screens/New/home.dart';
 import 'package:potholedetection/screens/dashboard.dart';
 import 'package:potholedetection/unused/home.dart';
 
@@ -162,8 +163,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                           Navigator.pushAndRemoveUntil(
                                               context,
                                               MaterialPageRoute(
-                                                  builder: (context) => MainDashboard(
-                                                        currentUser.user.uid,
+                                                  builder: (context) => HomePage(
+                                                        currentUser.user.uid, "2"
                                                       )),
                                               (_) => false),
                                           firstNameInputController.clear(),

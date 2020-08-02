@@ -105,7 +105,7 @@ class _TravelModeState extends State<TravelMode> {
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     print(position);
     print("Hello");
-
+    print(position.altitude);
     List<Placemark> placemark = await Geolocator()
         .placemarkFromCoordinates(position.latitude, position.longitude);
     Placemark place = placemark[0];
@@ -149,6 +149,7 @@ class _TravelModeState extends State<TravelMode> {
               count++;
             });
           var p = list[i].data["NumberOfReportings"];
+          var u= list[i].data["userid"];
           print("Priority is: " + p.toString());
           databaseReference
               .collection("location_travel")
@@ -156,7 +157,7 @@ class _TravelModeState extends State<TravelMode> {
               .updateData({
             "NumberOfReportings": p + 1,
             "timeStamp": DateTime.now(),
-            "userid": uid,
+            "userid": u+"," +uid,
           }).then((_) {
             print("update success!");
           });

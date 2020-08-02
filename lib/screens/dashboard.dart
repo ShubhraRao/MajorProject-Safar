@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +32,8 @@ class _MainDashboardState extends State<MainDashboard> {
   List<DocumentSnapshot> newlist2 = List();
   List<DocumentSnapshot> listimage = List();
   List<DocumentSnapshot> listfixed = List();
+  List<DocumentSnapshot> newfixed = List();
+
   bool isLoading = false;
   int count1 = 0;
   int count2 = 0;
@@ -46,11 +50,38 @@ class _MainDashboardState extends State<MainDashboard> {
 
   filterdata() {
     countlist = [];
+    List<String> uids = List();
+var rng = new Random();
+                        var code = rng.nextInt(9000) + 1000;
+                        // var docid;
+    // for(int i=0; i<newlist.length; i++)
+    // {
+    //   docid = "POT"+code.toString()+newlist[i].data["userid"].toString().substring(0,3);
+    // }
+
     for (int i = 0; i < newlist.length; i++) {
-      if (newlist[i].data["userid"] == uid) {
-        newlist2.add(newlist[i]);
+      for (int j = 0;
+          j < newlist[i].data["userid"].toString().split(',').length;
+          j++) {
+        if (newlist[i].data["userid"].toString().split(',')[j].trim() == uid.trim()) {
+          newlist2.add(newlist[i]);
+        }
       }
     }
+
+
+    for (int i = 0; i < listfixed.length; i++) {
+      for (int j = 0;
+          j < listfixed[i].data["userid"].toString().split(',').length;
+          j++) {
+        if (listfixed[i].data["userid"].toString().split(',')[j].trim() == uid.trim()) {
+          newfixed.add(listfixed[i]);
+        }
+      }
+    }
+    a = newlist2.length + newfixed.length;
+    print(newlist.length);
+    print("lenn");
     for (int i = 0; i < newlist2.length; i++) {
       if (newlist2[i].data["timeStamp"].toDate().toString().split(' ')[0] ==
           DateTime.now().toString().split(' ')[0]) {
@@ -67,8 +98,10 @@ class _MainDashboardState extends State<MainDashboard> {
               DateTime.now()
                   .subtract(const Duration(days: 2))
                   .toString()
-                  .split(' ')[0] &&
-          newlist[i].data["userid"] == uid) {
+                  .split(' ')[0]
+          //  &&
+          // newlist[i].data["userid"] == uid
+          ) {
         count3++;
       }
       if (newlist2[i].data["timeStamp"].toDate().toString().split(' ')[0] ==
@@ -129,6 +162,15 @@ class _MainDashboardState extends State<MainDashboard> {
     for (int i = 0; i < countlist.length; i++) print(countlist[i].count);
   }
 
+  // sortbydate(listn) {
+    Comparator<DocumentSnapshot> sortById =
+        (a, b) => a.data["timeStamp"].compareTo(b.data["timeStamp"]);
+    // newlist2.sort(sortById);
+    // print(listn);
+    // print(listn[0].data["timeStamp"].toDate());
+    // return listn;
+  // }
+
   _generateData(countlist) {
     _seriesBarData = List<charts.Series<Countbyuser, String>>();
     _seriesBarData.add(
@@ -173,13 +215,17 @@ class _MainDashboardState extends State<MainDashboard> {
     });
   }
 
+  var a;
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
       // bottomNavigationBar: _buildBottomBar(),
-      body: (!isLoading) ? Center(child: CircularProgressIndicator()) : _buildBody(context),
+      body: (!isLoading)
+          ? Center(child: CircularProgressIndicator())
+          : _buildBody(context),
     );
   }
 
@@ -208,20 +254,36 @@ class _MainDashboardState extends State<MainDashboard> {
                   builder: (BuildContext context) {
                     return AlertDialog(
                       shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(28.0))),
-                contentPadding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(28.0))),
+                      contentPadding:
+                          EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
                       title: Text('Warning'),
                       content: Text('Are you sure you want to log out?'),
                       actions: [
-                        FlatButton(child: Text('Yes', style: TextStyle(color: Colors.black,),), onPressed: () {
-                          FirebaseAuth.instance
-                  .signOut()
-                  .then((result) => Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => LoginPage())))
-                  .catchError((err) => print(err));
-                        }),
                         FlatButton(
-                          child: Text('No', style: TextStyle(color: Colors.black,),),
+                            child: Text(
+                              'Yes',
+                              style: TextStyle(
+                                color: Colors.black,
+                              ),
+                            ),
+                            onPressed: () {
+                              FirebaseAuth.instance
+                                  .signOut()
+                                  .then((result) => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => LoginPage())))
+                                  .catchError((err) => print(err));
+                            }),
+                        FlatButton(
+                          child: Text(
+                            'No',
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
+                          ),
                           onPressed: () {
                             Navigator.pop(context);
                           },
@@ -229,7 +291,6 @@ class _MainDashboardState extends State<MainDashboard> {
                       ],
                     );
                   });
-              
             },
             child: Icon(Icons.exit_to_app)),
         SizedBox(width: 10),
@@ -350,17 +411,18 @@ class _MainDashboardState extends State<MainDashboard> {
           ),
         ),
         GestureDetector(
+          
           onTap: () {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => MyPotholes(list: newlist2)));
+                    builder: (context) => MyPotholes(uid: uid,list: newlist2, fixed: newfixed)));
           },
           child: ListTile(
             leading: Icon(Icons.location_on, color: Colors.black),
             title: Text("MY POTHOLES",
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(newlist2.length.toString() + " potholes"),
+            subtitle: Text(a.toString() + " potholes"),
           ),
         ),
       ],

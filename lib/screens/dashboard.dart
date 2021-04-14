@@ -231,7 +231,8 @@ var rng = new Random();
 
   Widget _buildAppBar() {
     return AppBar(
-      automaticallyImplyLeading: false,
+      // leading: Icon(Icons.),
+      // automaticallyImplyLeading: false,
       flexibleSpace: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

@@ -150,7 +150,7 @@ class _TravelModeState extends State<TravelMode> {
             });
           var p = list[i].data["NumberOfReportings"];
           var u= list[i].data["userid"];
-          print("Priority is: " + p.toString());
+          // print("Priority is: " + p.toString());
           databaseReference
               .collection("location_travel")
               .document(list[i].documentID)
